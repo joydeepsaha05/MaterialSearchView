@@ -75,22 +75,6 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
     private Drawable suggestionIcon;
 
     private Context mContext;
-    private final OnClickListener mOnClickListener = new OnClickListener() {
-
-        public void onClick(View v) {
-            if (v == mBackBtn) {
-                closeSearch();
-            } else if (v == mVoiceBtn) {
-                onVoiceClicked();
-            } else if (v == mEmptyBtn) {
-                mSearchSrcTextView.setText(null);
-            } else if (v == mSearchSrcTextView) {
-                showSuggestions();
-            } else if (v == mTintView) {
-                closeSearch();
-            }
-        }
-    };
 
     public MaterialSearchView(Context context) {
         this(context, null);
@@ -226,6 +210,23 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
             ((Filterable) mAdapter).getFilter().filter(s, MaterialSearchView.this);
         }
     }
+
+    private final OnClickListener mOnClickListener = new OnClickListener() {
+
+        public void onClick(View v) {
+            if (v == mBackBtn) {
+                closeSearch();
+            } else if (v == mVoiceBtn) {
+                onVoiceClicked();
+            } else if (v == mEmptyBtn) {
+                mSearchSrcTextView.setText(null);
+            } else if (v == mSearchSrcTextView) {
+                showSuggestions();
+            } else if (v == mTintView) {
+                closeSearch();
+            }
+        }
+    };
 
     private void onVoiceClicked() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -649,6 +650,40 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
         super.onRestoreInstanceState(mSavedState.getSuperState());
     }
 
+    static class SavedState extends BaseSavedState {
+        String query;
+        boolean isSearchOpen;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        private SavedState(Parcel in) {
+            super(in);
+            this.query = in.readString();
+            this.isSearchOpen = in.readInt() == 1;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeString(query);
+            out.writeInt(isSearchOpen ? 1 : 0);
+        }
+
+        //required field that makes Parcelables from a Parcel
+        public static final Creator<SavedState> CREATOR =
+                new Creator<SavedState>() {
+                    public SavedState createFromParcel(Parcel in) {
+                        return new SavedState(in);
+                    }
+
+                    public SavedState[] newArray(int size) {
+                        return new SavedState[size];
+                    }
+                };
+    }
+
     public interface OnQueryTextListener {
 
         /**
@@ -678,39 +713,6 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
         void onSearchViewShown();
 
         void onSearchViewClosed();
-    }
-
-    static class SavedState extends BaseSavedState {
-        //required field that makes Parcelables from a Parcel
-        public static final Creator<SavedState> CREATOR =
-                new Creator<SavedState>() {
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
-
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
-        String query;
-        boolean isSearchOpen;
-
-        SavedState(Parcelable superState) {
-            super(superState);
-        }
-
-        private SavedState(Parcel in) {
-            super(in);
-            this.query = in.readString();
-            this.isSearchOpen = in.readInt() == 1;
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            super.writeToParcel(out, flags);
-            out.writeString(query);
-            out.writeInt(isSearchOpen ? 1 : 0);
-        }
     }
 
 
